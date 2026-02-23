@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -129,7 +129,7 @@ vim.o.smartcase = true
 -- Keep signcolumn on by default
 vim.o.signcolumn = 'yes'
 
--- Decrease update time
+-- Decrease update time (interval in ms for swapfile to be written when nothing is typed)
 vim.o.updatetime = 250
 
 -- Decrease mapped sequence wait time
@@ -217,6 +217,19 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
 -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
+
+-- Allow moving blocks (with auto indent)
+vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
+vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
+
+-- Keep cursor in place instead of jumping to EOL
+vim.keymap.set('n', 'J', 'mzJ`z')
+
+-- Allow <leader>p pasting without replacing register
+vim.keymap.set('x', '<leader>p', '"_dP', { desc = 'Paste without replacing register' })
+
+-- Allow easy replacement of word under cursor
+vim.keymap.set('n', '<leader>sr', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = '[S]earch [R]eplace word under cursor in buffer' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -405,7 +418,7 @@ require('lazy').setup({
       vim.keymap.set({ 'n', 'v' }, '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
-      vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
+      -- vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
