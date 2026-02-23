@@ -664,6 +664,7 @@ require('lazy').setup({
           },
         },
 
+        nixd = {},
         ts_ls = {},
         pyright = {},
         gopls = {},
