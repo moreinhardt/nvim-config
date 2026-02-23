@@ -503,7 +503,15 @@ require('lazy').setup({
       -- Mason must be loaded before its dependents so we need to set it up here.
       -- NOTE: `opts = {}` is the same as calling `require('mason').setup({})`
       { 'mason-org/mason.nvim', opts = {} },
+
+      -- -- This plugin streamlines Neovim's LSP setup by automating server
+      -- -- installation and activation, providing helpful management commands,
+      -- -- and mapping mason.nvim packages to nvim-lspconfig configurations.
+      -- { 'mason-org/mason-lspconfig.nvim', opts = {} },
+
+      -- TODO: remove!?
       'WhoIsSethDaniel/mason-tool-installer.nvim',
+      -- { 'WhoIsSethDaniel/mason-tool-installer.nvim', opts = { run_on_start = false } }, # TODO: set run_on_start dynamically based if on NixOS?
 
       -- Useful status updates for LSP.
       { 'j-hui/fidget.nvim', opts = {} },
@@ -625,7 +633,60 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
+
+        -- Special Lua Config, as recommended by neovim help docs
+        lua_ls = {
+          on_init = function(client)
+            if client.workspace_folders then
+              local path = client.workspace_folders[1].name
+              if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
+            end
+
+            client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+              runtime = {
+                version = 'LuaJIT',
+                path = { 'lua/?.lua', 'lua/?/init.lua' },
+              },
+              workspace = {
+                checkThirdParty = false,
+                library = {
+                  vim.env.VIMRUNTIME,
+                  '${3rd}/luv/library', -- https://github.com/folke/lazy.nvim/discussions/1349#discussioncomment-9122673
+                  -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
+                  --  See https://github.com/neovim/nvim-lspconfig/issues/3189
+                  -- library = vim.api.nvim_get_runtime_file('', true),
+                },
+              },
+            })
+          end,
+          settings = {
+            Lua = {},
+          },
+        },
+
+        ts_ls = {},
+        pyright = {},
+        gopls = {},
+        bashls = {},
+        marksman = {},
+        sqls = {},
+        yamlls = {
+          settings = {
+            yaml = {
+              schemaStore = {
+                enable = true,
+              },
+            },
+          },
+        },
+        jinja_lsp = {},
+        -- ansiblels = {},
+        taplo = {},
+        helm_ls = {},
       }
+
+      -- Detect NixOS
+      local is_nixos = vim.uv.fs_stat '/etc/NIXOS' ~= nil
 
       -- Ensure the servers and tools above are installed
       --
@@ -634,47 +695,28 @@ require('lazy').setup({
       --    :Mason
       --
       -- You can press `g?` for help in this menu.
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        'lua_ls', -- Lua Language server
-        'stylua', -- Used to format Lua code
-        -- You can add other tools here that you want Mason to install
-      })
 
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+      -- Mason tool installer — only auto-install on non-NixOS
+      local ensure_installed = {}
+      if not is_nixos then
+        -- Non-NixOS: let Mason install servers
+        ensure_installed = vim.tbl_keys(servers)
+        vim.list_extend(ensure_installed, {
+          'stylua', -- Used to format Lua code
+          -- You can add other tools here that you want Mason to install
+        })
+      end
+
+      -- TODO: move into if above
+      require('mason-tool-installer').setup {
+        ensure_installed = ensure_installed,
+      }
 
       for name, server in pairs(servers) do
         server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
         vim.lsp.config(name, server)
         vim.lsp.enable(name)
       end
-
-      -- Special Lua Config, as recommended by neovim help docs
-      vim.lsp.config('lua_ls', {
-        on_init = function(client)
-          if client.workspace_folders then
-            local path = client.workspace_folders[1].name
-            if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
-          end
-
-          client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
-            runtime = {
-              version = 'LuaJIT',
-              path = { 'lua/?.lua', 'lua/?/init.lua' },
-            },
-            workspace = {
-              checkThirdParty = false,
-              -- NOTE: this is a lot slower and will cause issues when working on your own configuration.
-              --  See https://github.com/neovim/nvim-lspconfig/issues/3189
-              library = vim.api.nvim_get_runtime_file('', true),
-            },
-          })
-        end,
-        settings = {
-          Lua = {},
-        },
-      })
-      vim.lsp.enable 'lua_ls'
     end,
   },
 
