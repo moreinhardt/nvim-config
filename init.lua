@@ -222,6 +222,10 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
 vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
 
+-- Keep selection when indenting to allow indenting multiple times
+vim.keymap.set('v', '<', '<gv', { desc = 'Indent left and keep selection' })
+vim.keymap.set('v', '>', '>gv', { desc = 'Indent right and keep selection' })
+
 -- Keep cursor in place instead of jumping to EOL
 vim.keymap.set('n', 'J', 'mzJ`z')
 
