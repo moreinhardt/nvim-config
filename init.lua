@@ -755,6 +755,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        sql = { 'sleek' }, -- no need for this once I have latest sqls version, https://github.com/sqls-server/sqls/issues/149#issuecomment-3067231878
 
         python = function(bufnr)
           if require('conform').get_formatter_info('ruff_format', bufnr).available then
