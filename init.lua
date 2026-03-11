@@ -794,12 +794,25 @@ require('lazy').setup({
           --    https://github.com/rafamadriz/friendly-snippets
           {
             'rafamadriz/friendly-snippets',
-            config = function()
-              require('luasnip.loaders.from_vscode').lazy_load()
-            end,
+            config = function() require('luasnip.loaders.from_vscode').lazy_load() end,
           },
         },
-        opts = {},
+        config = function()
+          local ls = require 'luasnip'
+          ls.setup {
+            -- This tells LuaSnip to remember to keep around the last snippet.
+            -- You can jump back into it even if you move outside of the selection
+            history = true,
+
+            -- This one is cool cause if you have dynamic snippets, it updates as you type!
+            updateevents = 'TextChanged,TextChangedI',
+
+            enable_autosnippets = true,
+          }
+          require 'snippets' -- load custom snippets from lua/snippets.lua
+
+          vim.keymap.set('n', '<leader><leader>s', function() dofile(vim.fn.stdpath 'config' .. '/lua/snippets.lua') end, { desc = 'Reload snippets' })
+        end,
       },
     },
     --- @module 'blink.cmp'
