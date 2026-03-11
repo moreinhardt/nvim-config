@@ -238,6 +238,16 @@ vim.keymap.set('n', '<leader>sr', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left>
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
+-- Set Nix files to 2-space indentation by default (guess-indent will still override if it detects otherwise)
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'nix',
+  callback = function()
+    vim.bo.tabstop = 2
+    vim.bo.shiftwidth = 2
+    vim.bo.expandtab = true
+  end,
+})
+
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
 --  See `:help vim.hl.on_yank()`
