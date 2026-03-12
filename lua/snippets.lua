@@ -36,6 +36,39 @@ ls.add_snippets('nix', {
       { i(1), i(2) }
     )
   ),
+  -- full module
+  s(
+    'modfull',
+    fmt(
+      [[
+      {{ config, lib, pkgs, ... }}:
+      {{
+        options.{}.{} = {{
+          enable = lib.mkOption {{
+            type = lib.types.bool;
+            default = true;
+            description = "Whether to enable {}.";
+          }};
+        }};
+
+        config = lib.mkIf config.{}.{}.enable {{
+          {}
+        }};
+      }}
+    ]],
+      {
+        i(1, 'custom'),
+        i(2),
+        d(3, function(args)
+          -- insert node with default value from position 2
+          return sn(nil, { i(1, args[1]) })
+        end, { 2 }),
+        rep(1),
+        rep(2),
+        i(4),
+      }
+    )
+  ),
   -- f for field
   s('f', fmt('{} = {};', { i(1), i(2) })),
   -- m for map
