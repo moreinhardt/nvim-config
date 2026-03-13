@@ -811,7 +811,41 @@ require('lazy').setup({
           }
           require 'snippets' -- load custom snippets from lua/snippets.lua
 
+          -- Virtual text hint when inside a choice node
+          local choice_hint_ns = vim.api.nvim_create_namespace 'luasnip_choice_hint'
+
+          local function update_choice_hint()
+            vim.api.nvim_buf_clear_namespace(0, choice_hint_ns, 0, -1)
+            local node = ls.session.event_node
+            local total = #node.choices
+            local current = 0
+            for i, c in ipairs(node.choices) do
+              if c == node.active_choice then
+                current = i
+                break
+              end
+            end
+            local pos = node.mark:pos_begin_raw()
+            vim.api.nvim_buf_set_extmark(0, choice_hint_ns, pos[1], 0, {
+              virt_text = { { ('« choice node [%d/%d] »'):format(current, total), 'Comment' } },
+              virt_text_pos = 'eol',
+            })
+          end
+
+          vim.api.nvim_create_autocmd('User', {
+            pattern = { 'LuasnipChoiceNodeEnter', 'LuasnipChangeChoice' },
+            callback = update_choice_hint,
+          })
+          vim.api.nvim_create_autocmd('User', {
+            pattern = 'LuasnipChoiceNodeLeave',
+            callback = function() vim.api.nvim_buf_clear_namespace(0, choice_hint_ns, 0, -1) end,
+          })
+
           vim.keymap.set('n', '<leader><leader>s', function() dofile(vim.fn.stdpath 'config' .. '/lua/snippets.lua') end, { desc = 'Reload snippets' })
+
+          vim.keymap.set({ 'i', 's' }, '<c-l>', function()
+            if ls.choice_active() then ls.change_choice(1) end
+          end)
         end,
       },
     },
@@ -841,6 +875,8 @@ require('lazy').setup({
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
         preset = 'default',
+
+        ['<C-z>'] = { 'accept' },
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
