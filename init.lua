@@ -1002,6 +1002,23 @@ require('lazy').setup({
     end,
   },
 
+  -- Allow sorting code blocks based on treesitter nodes
+  {
+    'JavierPoduje/smartsort.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+    },
+    config = function()
+      require('smartsort').setup {
+        non_sortable_behavior = 'preserve', -- options: "preserve", "above", "below"
+        single_line_separator = ',', -- use as the default separator for single line sorting
+      }
+
+      vim.keymap.set('v', '<leader>s', ':Smartsort')
+    end,
+  },
+
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
