@@ -768,6 +768,10 @@ require('lazy').setup({
         end
       end,
       formatters_by_ft = {
+        javascript = { 'prettierd', 'prettier', stop_after_first = true },
+        javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        typescript = { 'prettierd', 'prettier', stop_after_first = true },
+        typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
         lua = { 'stylua' },
         nix = { 'nixfmt' }, -- nixd uses this automatically if available, but let's set it explicitly
         sql = { 'sleek' }, -- no need for this once I have latest sqls version, https://github.com/sqls-server/sqls/issues/149#issuecomment-3067231878
