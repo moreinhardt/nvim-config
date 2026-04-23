@@ -402,6 +402,8 @@ require('lazy').setup({
         --  All the info you're looking for is in `:help telescope.setup()`
         --
         defaults = {
+          layout_strategy = 'flex',
+          layout_config = { flex = { flip_columns = 160 } },
           mappings = {
             i = {
               ['<C-enter>'] = 'to_fuzzy_refine',
